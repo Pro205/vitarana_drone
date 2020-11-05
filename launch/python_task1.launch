@@ -1,0 +1,20 @@
+ <launch>
+<node pkg="vitarana_drone" type="position_controller.py" name="position_controller" 
+output="screen"/>
+
+<node pkg="vitarana_drone" type="attitude_controller.py" name="attitude_controller" 
+output="screen"/>
+
+<arg name="record" default="true"/>
+<arg name="duration" default="90"/>
+<arg name="rec_name" default="Task_1_VD.bag"/>
+
+<group if="$(arg record)">
+
+    <node name="rosbag_record_position" pkg="rosbag" type="record"
+       args="record -O $(find vitarana_drone)/bag_files/$(arg rec_name) --duration=$(arg duration) /edrone/gps /edrone/gps_velocity" output="screen"/>
+
+</group>
+
+ </launch>
+
