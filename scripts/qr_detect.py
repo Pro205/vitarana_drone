@@ -2,12 +2,12 @@
 
 
 '''
-This is a boiler plate script that contains an example on how to subscribe a rostopic containing camera frames 
+This is a boiler plate script that contains an example on how to subscribe a rostopic containing camera frames
 and store it into an OpenCV image to use it further for image processing tasks.
 Use this code snippet in your code or you can also continue adding your code in the same file
 '''
 
-
+from pyzbar.pyzbar import decode
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
@@ -18,20 +18,37 @@ class image_proc():
 
 	# Initialise everything
 	def __init__(self):
-		rospy.init_node('barcode_test') #Initialise rosnode 
+		rospy.init_node('barcode_test') #Initialise rosnode
 		self.image_sub = rospy.Subscriber("/edrone/camera/image_raw", Image, self.image_callback) #Subscribing to the camera topic
 		self.img = np.empty([]) # This will contain your image frame from camera
 		self.bridge = CvBridge()
 
 
-	# Callback function of amera topic
+	# Callback function of camera topic
 	def image_callback(self, data):
 		try:
 			self.img = self.bridge.imgmsg_to_cv2(data, "bgr8") # Converting the image to OpenCV standard image
 		except CvBridgeError as e:
 			print(e)
-			return
+			return self.img
+
+	def QR_detector(self):
+
+		self.data = decode(self.img)[0][0]
+		# 	# self.detector_qr = decode(self.img)
+		# 	# self.QR_code =  cv2.imshow("QR", self.img)
+		# 	# cv2.waitkey(1)
+		#     # print(self.detector_qr.data.decode())
+		# 	# print(self.QR_code)
+		#self.data = cv2.imshow("result", self.img)
+		#self.data = decode(self.img)
+		print(self.data)
+
+
 
 if __name__ == '__main__':
-    image_proc_obj = image_proc()
-    rospy.spin()
+	image_proc_obj = image_proc()
+	r = rospy.Rate(30)
+	while not rospy.is_shutdown():
+		image_proc_obj.QR_detector()
+		r.sleep()

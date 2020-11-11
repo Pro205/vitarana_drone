@@ -85,10 +85,10 @@ class Edrone():
         # Subscribing to /drone_command, imu/data, /pid_tuning_roll, /pid_tuning_pitch, /pid_tuning_yaw
         rospy.Subscriber('/drone_command', edrone_cmd, self.drone_command_callback)
         rospy.Subscriber('/edrone/imu/data', Imu, self.imu_callback)
-        rospy.Subscriber('/pid_tuning_roll', PidTune, self.roll_set_pid)
+        # rospy.Subscriber('/pid_tuning_roll', PidTune, self.roll_set_pid)
         # -------------------------Add other ROS Subscribers here----------------------------------------------------
-	rospy.Subscriber('/pid_tuning_pitch', PidTune, self.pitch_set_pid)
-	rospy.Subscriber('/pid_tuning_yaw', PidTune, self.yaw_set_pid)
+        # rospy.Subscriber('/pid_tuning_pitch', PidTune, self.pitch_set_pid)
+	    #rospy.Subscriber('/pid_tuning_yaw', PidTune, self.yaw_set_pid)
         # ------------------------------------------------------------------------------------------------------------
 
 
@@ -205,7 +205,7 @@ class Edrone():
 if __name__ == '__main__':
 
     e_drone = Edrone()
-    r = rospy.Rate(30)  
+    r = rospy.Rate(30)
     while not rospy.is_shutdown():
         e_drone.pid()
         r.sleep()
