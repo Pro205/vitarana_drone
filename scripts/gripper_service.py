@@ -4,7 +4,9 @@ import rospy
 from gazebo_msgs.msg import ModelStates
 from gazebo_ros_link_attacher.srv import Attach, AttachRequest, AttachResponse
 from vitarana_drone.srv import Gripper, GripperResponse, GripperRequest
+from vitarana_drone.msg import *
 from std_msgs.msg import String
+import time
 
 
 class edrone_gripper():
@@ -24,10 +26,14 @@ class edrone_gripper():
         self.box_index = 0
         self.drone_index = 0
         self.pickable_flag = 'False'
+        self.gripper_data = gripper()
+        self.gripper_state = 0
+        self.gripper_data.result = self.gripper_state
 
         self.box_coordinates = [0.0, 0.0, 0.0]
         self.drone_coordinates = [0.0, 0.0, 0.0]
         rospy.Subscriber('/gazebo/model_states_throttle', ModelStates, self.model_state_callback)
+        self.gripper_status = rospy.Publisher('/gripper_status', gripper, queue_size=1)
         self.check_pub = rospy.Publisher('/edrone/gripper_check', String, queue_size=1)
         self.gripper_service = rospy.Service('/edrone/activate_gripper', Gripper, self.callback_service_on_request)
 
@@ -46,6 +52,7 @@ class edrone_gripper():
 
         if((req.activate_gripper == True) and (self.pickable_flag == 'True') ):
             self.activate_gripper()
+            self.gripper_state = 1
             return GripperResponse(True)
         else:
             self.deactivate_gripper()
@@ -59,6 +66,8 @@ class edrone_gripper():
         req.model_name_2 = 'parcel_box'
         req.link_name_2 = 'link'
         self._attach_srv_a.call(req)
+        time.sleep(0.5)
+        self.gripper_data.result = self.gripper_state
 
     def deactivate_gripper(self):
         rospy.loginfo("Detach request received")
@@ -68,6 +77,7 @@ class edrone_gripper():
         req.model_name_2 = 'parcel_box'
         req.link_name_2 = 'link'
         self._attach_srv_d.call(req)
+
 
     def check(self):
         try:
@@ -94,7 +104,7 @@ class edrone_gripper():
             self.pickable_flag = 'False'
 
         self.check_pub.publish(self.pickable_flag)
-
+        self.gripper_status.publish(self.gripper_data)
 
 def main():
     eDrone_gripper = edrone_gripper()
