@@ -66,7 +66,7 @@ class edrone_gripper():
         req.model_name_2 = 'parcel_box'
         req.link_name_2 = 'link'
         self._attach_srv_a.call(req)
-        time.sleep(0.5)
+        time.sleep(0.3)
         self.gripper_data.result = self.gripper_state
 
     def deactivate_gripper(self):
@@ -108,7 +108,7 @@ class edrone_gripper():
 
 def main():
     eDrone_gripper = edrone_gripper()
-    r = rospy.Rate(10)
+    r = rospy.Rate(60)
     while not rospy.is_shutdown():
         try:
             eDrone_gripper.check()

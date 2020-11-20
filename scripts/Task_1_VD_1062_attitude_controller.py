@@ -205,7 +205,7 @@ class Edrone():
 if __name__ == '__main__':
 
     e_drone = Edrone()
-    r = rospy.Rate(25)
+    r = rospy.Rate(60)
     while not rospy.is_shutdown():
         e_drone.pid()
         r.sleep()

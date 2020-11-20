@@ -73,7 +73,7 @@ class image_proc():
 
 if __name__ == '__main__':
 	image_proc_obj = image_proc()
-	r = rospy.Rate(25)
+	r = rospy.Rate(30)
 	while not rospy.is_shutdown():
 		image_proc_obj.QR_detector()
 		r.sleep()

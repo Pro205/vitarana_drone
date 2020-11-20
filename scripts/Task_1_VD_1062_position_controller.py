@@ -21,9 +21,9 @@ class Edrone():
 		self.drone_cmd = edrone_cmd()
 
 		# pid values  kp[0] : longitude, kp[1] : latitude, kp[2] : altitude and likewise.
-		self.kp = [0.0228, 0.0290, 508]
-		self.ki = [0.046, 0.0082, 0.070]
-		self.kd = [1.692, 1.99, 5334]
+		self.kp = [0.0208, 0.0290, 508]
+		self.ki = [0.0066, 0.0082, 0.070]
+		self.kd = [1.692, 1.79, 5334]
 
 		# previous errors
 		self.prev_values = [0.0, 0.0, 0.0]
@@ -124,22 +124,22 @@ class Edrone():
 		self.latitude_check = math.floor( (self.gps_required_cord[1] - self.gps_current_cord[1]) * math.pow(10, 4))
 		self.longitude_check =  math.floor( (self.gps_required_cord[0] - self.gps_current_cord[0]) * math.pow(10, 4))
 
-		if self.longitude_check > 0 and self.package_index == 0  :
+		if self.longitude_check > 0:
 			self.gps_required_cord[0] = self.longitude + self.const_longitude
 			self.land_longitude_required =  math.floor( (self.gps_required_cord[0] - self.const_longitude) * math.pow(10, 6))
 			self.land_longitude_current = math.floor( (self.gps_current_cord[0]) * math.pow(10, 6))
 
-		if self.latitude_check > 0 and self.package_index == 0:
+		if self.latitude_check > 0 :
 			self.gps_required_cord[1] = self.latitude + self.const_latitude
 			self.land_latitude_required =  math.floor( (self.gps_required_cord[1] - self.const_latitude ) * math.pow(10, 6))
 			self.land_latitude_current =  math.floor( (self.gps_current_cord[1]) * math.pow(10, 6))
 
-		if self.longitude_check < 0 and self.package_index == 0:
+		if self.longitude_check < 0:
 			self.gps_required_cord[0] = self.longitude - self.const_longitude
 			self.land_longitude_required =  math.floor( (self.gps_required_cord[0] + self.const_longitude) * math.pow(10, 6))
 			self.land_longitude_current = math.floor( (self.gps_current_cord[0]) * math.pow(10, 6))
 
-		if self.latitude_check < 0 and self.package_index == 0:
+		if self.latitude_check < 0 :
 			self.gps_required_cord[1] = self.latitude - self.const_latitude
 			self.land_latitude_required =  math.floor( (self.gps_required_cord[1] + self.const_latitude ) * math.pow(10, 6))
 			self.land_latitude_current =  math.floor( (self.gps_current_cord[1]) * math.pow(10, 6))
@@ -150,23 +150,22 @@ class Edrone():
 		# if self.gps_current_cord[2] <= 4.0 and self.land_latitude_required >= self.land_latitude_current:
 		# 	self.gps_required_cord[2] = 4.5
 
-		if  (self.land_latitude_required + 2.544) >= self.land_latitude_current and self.package_index == 0 and self.altitude_correction == 1:
+
+		if  (self.land_latitude_required + 2.544) >= self.land_latitude_current and self.altitude_correction == 1 and self.package_index == 0:
 		 	 # self.gps_required_cord[1] = self.latitude
-			 self.gps_required_cord[2] = 23.46
+			 self.gps_required_cord[2] = 23.26
 			# self.gps_required_cord[2] = 1.3
 		# #
-		if self.gps_current_cord[2] <= 22.66 and  (self.land_latitude_required + 2.544) >= self.land_latitude_current and self.altitude_correction == 1:
+		if self.gps_current_cord[2] <= 22.18 and  (self.land_latitude_required + 2.544) >= self.land_latitude_current and self.altitude_correction == 1 :
 			self.gps_required_cord[2] = 0.0
-			self.gps_required_cord[0] = self.gps_current_cord[0]
-			self.gps_required_cord[1] = self.gps_current_cord[1]
  			self.altitude_correction = 0
 
 
-		if self.gps_current_cord[2] <= 22.16 and self.package_index == 0 :
+		if self.gps_current_cord[2] <= 22.17 and self.package_index == 0 :
 			self.gripper_state = True
 			self.package_attacment()
 
-		if  self.gps_current_cord[2] <= 22.16 and self.package_index == 1 :
+		if  self.gps_current_cord[2] <= 22.17 and self.package_index == 1 :
 			self.gps_required_cord[2] = self.altitude
 			self.latitude = self.gps_package_cord[0]
 			self.longitude = self.gps_package_cord[1]
@@ -181,19 +180,29 @@ class Edrone():
 
 		if self.isforward == 1 :
 			if self.sensor_data[3] <= 18 and self.sensor_data[3] >= 0.5:
-				self.obstacle_roll = 2
+				self.obstacle_roll = 1
 
-			if self.sensor_data[3] <= 4 and self.sensor_data[3] >= 0.5:
-				self.obstacle_pitch = 2
+			if self.sensor_data[3] <= 5 and self.sensor_data[3] >= 0.5:
+				self.obstacle_pitch = 1
 
 		if self.gps_current_cord[1] <= 19.00034 and self.package_index == 1:
 			self.obstacle_roll = 0
 			self.obstacle_pitch = 0
+			self.longitude = self.gps_package_cord[1] + self.const_longitude
 
 
-		# if self.gps_current_cord[2] >= 3.0 and self.package_index == 1 :
-		# 	self.gripper_state = False
-		# 	self.package_attacment()
+		if  (self.land_latitude_required + 2.544) >= self.land_latitude_current and self.altitude_correction == 0 and self.package_index == 1:
+			 self.gps_required_cord[2] = self.gps_package_cord[2] + 1.44
+
+
+		if self.gps_current_cord[2] <= (self.gps_package_cord[2] + 0.4) and  (self.land_latitude_required + 2.544) >= self.land_latitude_current and self.altitude_correction == 0 :
+			self.gps_required_cord[2] = 0.0
+			self.altitude_correction = 1
+
+		if self.gps_current_cord[2] <= (self.gps_package_cord[2] + 0.4) and self.package_index == 1 :
+			self.gripper_state = False
+			self.package_attacment()
+
 
 
 		#pid tuning for longitude
@@ -233,7 +242,7 @@ class Edrone():
 
 if __name__ == '__main__':
 	e_drone = Edrone()
-	r = rospy.Rate(25)
+	r = rospy.Rate(60)
 	while not rospy.is_shutdown():
 		e_drone.controller()
 		r.sleep()
