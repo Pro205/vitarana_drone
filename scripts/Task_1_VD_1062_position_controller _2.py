@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#*********************************** This is the 2.0 version of position_controller**************************
 
 from vitarana_drone.srv import Gripper, GripperRequest
 from vitarana_drone.msg import *
@@ -65,7 +66,7 @@ class Edrone():
 		#self.zero_error_pub = rospy.Publisher('/drone_command', zero_error_cmd, queue_size=1)
 		#self.z_error_pub = rospy.Publisher('/drone_command', z_error_cmd, queue_size=1)
 		# *******************Subscriber topics***********************
-		# rospy.Subscriber('/pid_tuning_altitude', PidTune, self.altitude_set_pid)
+		rospy.Subscriber('/pid_tuning_altitude', PidTune, self.altitude_set_pid)
 		rospy.Subscriber('/gripper_status', gripper, self.gripper_res)
 		rospy.Subscriber('/edrone/gps', NavSatFix, self.gps_callback)
 		rospy.Subscriber('/qr_cmd', qr_data, self.qr_data_callback)
@@ -108,10 +109,10 @@ class Edrone():
 	#         self.Ki[0] = pitch.Ki * 0.008
 	#         self.Kd[0] = pitch.Kd * 0.3
 
-	# def altitude_set_pid(self, throttle):
-	# 	   self.kp[1] = throttle.Kp * 0.0006
-	# 	   self.ki[1] = throttle.Ki * 0.008
-	# 	   self.kd[1] = throttle.Kd * 0.003
+	def altitude_set_pid(self, throttle):
+		   self.kp[1] = throttle.Kp * 0.0006
+		   self.ki[1] = throttle.Ki * 0.008
+		   self.kd[1] = throttle.Kd * 0.003
 
 
 	def controller(self):

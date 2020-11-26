@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#*********************************** This is the 2.0 version of position_controller**************************
 
 from vitarana_drone.srv import Gripper, GripperRequest
 from vitarana_drone.msg import *
@@ -21,9 +22,9 @@ class Edrone():
 		self.drone_cmd = edrone_cmd()
 
 		# pid values  kp[0] : longitude, kp[1] : latitude, kp[2] : altitude and likewise.
-		self.kp = [0.0208, 0.0290, 508]
-		self.ki = [0.0066, 0.0082, 0.070]
-		self.kd = [1.692, 1.79, 5334]
+		self.kp = [0.02358, 0.0537, 508]
+		self.ki = [0.0086, 0.0062, 0.070]
+		self.kd = [1.4098, 1.3829, 5334]
 
 		# previous errors
 		self.prev_values = [0.0, 0.0, 0.0]
@@ -33,7 +34,7 @@ class Edrone():
 
 		# constants to keep the drone stable and fast aswell (#Experiment)
 		self.const_longitude = 0.0000300
-		self.const_latitude = 0.000032
+		self.const_latitude = 0.000030
 		self.const_altitude = 4.0
 		#To check the setpoints
 		self.land_latitude_required = 0.0
@@ -41,9 +42,9 @@ class Edrone():
 		self.land_longitude_required = 0.0
 		self.land_longitude_current = 0.0
 		#inputs 19.0007046575  71.9998955286
-		self.altitude_base = 0.35
-		self.longitude = 71.00
-		self.latitude  = 19.000
+		self.altitude_base = 22.17
+		self.longitude = 71.9998955286
+		self.latitude  = 19.0007046575
 		self.altitude = self.altitude_base  + self.const_altitude
 		# To know if package has been picked up or not
 		self.package_index = 0
@@ -109,9 +110,9 @@ class Edrone():
 	#         self.Kd[0] = pitch.Kd * 0.3
 
 	# def altitude_set_pid(self, throttle):
-	# 	   self.kp[1] = throttle.Kp * 0.0006
-	# 	   self.ki[1] = throttle.Ki * 0.008
-	# 	   self.kd[1] = throttle.Kd * 0.003
+	# 	   self.kp[0] = throttle.Kp * 0.00006
+	# 	   self.ki[0] = throttle.Ki * 0.0008
+	# 	   self.kd[0] = throttle.Kd * 0.0003
 
 
 	def controller(self):
@@ -150,24 +151,16 @@ class Edrone():
 			self.land_latitude_required =  math.floor( (self.gps_required_cord[1] + self.const_latitude ) * math.pow(10, 6))
 			self.land_latitude_current =  math.floor( (self.gps_current_cord[1]) * math.pow(10, 6))
 
-		# if (self.land_latitude_required - 0.0000014444 ) == self.land_latitude_current:
-		# 	self.gps_required_cord[2] = 5.8
-		#
-		# if self.gps_current_cord[2] <= 4.0 and self.land_latitude_required >= self.land_latitude_current:
-		# 	self.gps_required_cord[2] = 4.5
-
 		# package picking landing sequence
 		if  (self.land_latitude_required + 2.544) >= self.land_latitude_current and self.altitude_correction == 1 and self.package_index == 0:
-		 	 # self.gps_required_cord[1] = self.latitude
-			 self.gps_required_cord[2] = self.altitude_base + 1.14
-			# self.gps_required_cord[2] = 1.3
-		# #
-		if self.gps_current_cord[2] <= self.altitude_base and  (self.land_latitude_required + 2.544) >= self.land_latitude_current and self.altitude_correction == 1 :
+			 self.gps_required_cord[2] = self.altitude_base + 1.2
+
+		if self.gps_current_cord[2] <= (self.altitude_base +0.2) and  (self.land_latitude_required + 2.544) >= self.land_latitude_current and self.altitude_correction == 1 :
 			self.gps_required_cord[2] = 0.0
  			self.altitude_correction = 0
 
  		# picking up the package
-		if self.gps_current_cord[2] <= self.altitude_base and self.package_index == 0 :
+		if self.gps_current_cord[2] <= (self.altitude_base) and self.package_index == 0 :
 			self.gripper_state = True
 			self.package_attacment()
 		# getting the setpoint/gps cord from barcode
@@ -176,10 +169,6 @@ class Edrone():
 			self.latitude = self.gps_package_cord[0]
 			self.longitude = self.gps_package_cord[1]
 
-
-		# if self.gps_current_cord[2] >= 25.0 and self.package_index == 1:
-		# 	self.gps_required_cord[1] = self.gps_package_cord[0]
-		# 	self.gps_required_cord[0] = self.gps_package_cord[1]
 		#***************** obstacle avoiding******************
 		if self.latitude_check < 0 and self.package_index == 1:
 			self.isforward = 1
@@ -191,21 +180,20 @@ class Edrone():
 			if self.sensor_data[3] <= 5 and self.sensor_data[3] >= 0.5:
 				self.obstacle_pitch = 1
 		# making the drone achieved its package cord
-		if self.gps_current_cord[1] <= 19.00034 and self.package_index == 1:
+		if self.gps_current_cord[1] <= 19.00044 and self.package_index == 1:
 			self.obstacle_roll = 0
 			self.obstacle_pitch = 0
 			self.longitude = self.gps_package_cord[1] + self.const_longitude
 
 		# package dropping landing sequence
 		if  (self.land_latitude_required + 2.544) >= self.land_latitude_current and self.altitude_correction == 0 and self.package_index == 1:
-			 self.gps_required_cord[2] = self.gps_package_cord[2] + 1.24
+			 self.gps_required_cord[2] = self.gps_package_cord[2] + 1.3
 
 
 		if self.gps_current_cord[2] <= (self.gps_package_cord[2] + 0.4) and  (self.land_latitude_required + 2.544) >= self.land_latitude_current and self.altitude_correction == 0 :
 			self.gps_required_cord[2] = 0.0
-			self.altitude_correction = 1
 		#dropping the package
-		if self.gps_current_cord[2] <= (self.gps_package_cord[2] + 0.4) and self.package_index == 1 :
+		if self.gps_current_cord[2] <= (self.gps_package_cord[2]) and self.package_index == 1 :
 			self.gripper_state = False
 			self.package_attacment()
 
